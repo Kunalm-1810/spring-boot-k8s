@@ -1,33 +1,37 @@
 pipeline {
     agent any
     tools {
-        maven 'MAVEN_HOME' // Matches the name in Global Tool Configuration
+        // Ensure 'MAVEN_HOME' is the EXACT name you gave 
+        // in Manage Jenkins > Tools > Maven installations
+        maven 'MAVEN_HOME' 
     }
     stages {
         stage('Checkout') {
             steps {
-                checkout scm // Automatically pulls code from your Git repo
+                checkout scm 
             }
         }
         stage('Build') {
             steps {
-                sh 'mvn clean compile' // Compiles the code
+                // Use 'bat' instead of 'sh' for Windows
+                bat 'mvn clean compile' 
             }
         }
         stage('Test') {
             steps {
-                sh 'mvn test' // Runs your JUnit test cases
+                bat 'mvn test' 
             }
             post {
                 always {
-                    // Integration: Publishes test reports to the Jenkins UI
-                    junit '**/target/surefire-reports/*.xml' 
+                    // This path is usually fine, but being specific prevents 
+                    // the SAXParseException you saw earlier
+                    junit 'target/surefire-reports/*.xml' 
                 }
             }
         }
         stage('Package') {
             steps {
-                sh 'mvn package -DskipTests' // Creates the JAR file
+                bat 'mvn package -DskipTests' 
             }
             post {
                 success {
@@ -38,9 +42,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying to AWS/Server...'
-                // Add deployment commands here (e.g., AWS CLI or SSH)
+                // For Windows deployment to AWS, you would use:
+                // bat 'aws s3 cp target/*.jar s3://your-bucket-name/'
             }
         }
     }
 }
-  
